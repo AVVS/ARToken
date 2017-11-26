@@ -23,14 +23,28 @@ const info = [
 ].join('\n');
 
 module.exports = function(deployer, network, _accounts) {
-  const accounts = _accounts.slice(0, 5);
+  let accounts;
+  switch (network) {
+    case 'live':
+      throw new Error('not defined');
 
-  console.info('\nAccounts:');
-  console.info(info, ...accounts);
+    case 'ropsten':
+      accounts = [
+        '0x006EB704aB30Fd9FEe1db6561856D75D5db8fA4e',
+        '0x00C87c16690bCD086d0F8F9216806C69f35ec12A',
+        '0x00E5300B54F2B5AFA9e11201b5Fc048cAE52d981',
+        '0x00bFeD8A3Ab20CAd28328A8ACfE7Db0700ede5c2',
+        '0x004367dF01759d415b63430c6d6b242CEE2dF6de',
+      ];
+      break;
 
-  if (network === 'live') {
-    throw new Error('ensure before deploying');
+    default:
+      accounts = _accounts.slice(0, 5);
   }
+
+  // deployer
+  console.error('\nAccounts:');
+  console.error(info, ...accounts);
 
   deployer.deploy(TokenAllocation, ...accounts);
 };

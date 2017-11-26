@@ -13,11 +13,12 @@
     "compile": "truffle compile",
     "rpc": "ganache-cli --host 127.0.0.1 -l 115000000 -d -i 1337",
     "t:test": "truffle --network test",
-    "t:ropsten": "truffle --network ropsten",
-    "t:live": "truffle --network live",
+    "t:ropsten": "NODE_ENV=production truffle --network ropsten",
+    "t:live": "NODE_ENV=production truffle --network live",
     "deploy": "yarn compile && yarn t:test deploy",
-    "deploy:ropsten": "yarn compile && yarn t:ropsten deploy",
-    "deploy:live": "NODE_ENV=production yarn compile --all && yarn t:live deploy"
+    "deploy:ropsten": "NODE_ENV=production yarn compile && yarn t:ropsten deploy",
+    "deploy:live": "NODE_ENV=production yarn compile --all && yarn t:live deploy",
+    "parity:ropsten": "parity --chain ropsten --geth -lrpc=trace --jsonrpc-port 8547 --unlock 0x006EB704aB30Fd9FEe1db6561856D75D5db8fA4e --password .env --reseal-min-period 0 --tx-gas-limit 4704624"
   },
   "resolutions": {
     "web3": "0.20.2"

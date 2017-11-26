@@ -20,14 +20,17 @@ module.exports = {
       network_id: '*',
     },
     ropsten: {
+      from: '0x006EB704aB30Fd9FEe1db6561856D75D5db8fA4e',
       host: 'localhost',
-      port: 8546,
+      port: 8547,
       network_id: 3,
+      gas: 4704624,
+      gasPrice: 1000000000, // 1 gwei
     },
     live: {
       network_id: 1,
       host: 'localhost',
-      port: 8547,
+      port: 8548,
     },
   },
   solc: {
