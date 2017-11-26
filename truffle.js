@@ -24,7 +24,7 @@ module.exports = {
       host: 'localhost',
       port: 8547,
       network_id: 3,
-      gas: 4704624,
+      gas: 4500000,
       gasPrice: 1000000000, // 1 gwei
     },
     live: {
@@ -36,7 +36,7 @@ module.exports = {
   solc: {
     optimizer: {
       enabled: process.env.NODE_ENV === 'production',
-      runs: 500
+      runs: 200
     }
   }
 };

@@ -3,9 +3,9 @@ pragma solidity ^0.4.18;
 import "../ERC20.sol";
 import "../../libraries/SafeMath.sol";
 
-  /**
-   * @dev For the tokens issued for founders.
-   */
+/**
+ * @dev For the tokens issued for founders.
+ */
 contract VestingWallet {
     using SafeMath for uint;
 
