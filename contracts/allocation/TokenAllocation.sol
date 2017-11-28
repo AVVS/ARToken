@@ -197,7 +197,9 @@ contract TokenAllocation is GenericCrowdsale {
     }
 
     /**
-     * @dev Issue tokens for founders and partners, end the current phase.
+     * @dev Issues the rewards for founders and early contributors. 18% and 12% of the total token supply by the end
+     *   of the crowdsale, respectively, including all the token bonuses on early contributions. Can only be
+     *   called after the end of the crowdsale phase, ends the current phase.
      */
     function rewardFoundersAndPartners() external onlyBackend onlyValidPhase onlyUnpaused {
         uint tokensDuringThisPhase;

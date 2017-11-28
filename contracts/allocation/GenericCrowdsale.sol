@@ -78,12 +78,8 @@ contract GenericCrowdsale {
     }
 
     /**
-     * @dev Issues the rewards for founders and early contributors. 18% and 12% of the total token supply by the end
-     *        of the crowdsale, respectively, including all the token bonuses on early contributions. Can only be
-     *        called after the end of the crowdsale phase, ends the current phase.
+     * @dev Modifiers
      */
-    function rewardFoundersAndPartners() onlyBackend onlyUnpaused external;
-
     modifier onlyManager() {
         require(msg.sender == icoManager);
         _;
