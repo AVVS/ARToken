@@ -425,7 +425,7 @@ contract("allocation", function(accounts) {
     // TEST 13: end phase one
     it("end phase 1, check founders' and partners' rewards to be 18% and 12% of total", async () => {
         let token = ERC20.at(await allocation.tokenContract());
-        await allocation.rewardFoundersAndPartners({from: icoBackend});
+        await allocation.rewardFoundersAndPartners({ from: icoManager });
 
         let totalSupply = await token.totalSupply();
 
@@ -605,7 +605,7 @@ contract("allocation", function(accounts) {
     // TEST 17: end phase two
     it("end phase 2, check founders' and partners' rewards to be 18% and 12% of total", async () => {
         let token = ERC20.at(await allocation.tokenContract());
-        await allocation.rewardFoundersAndPartners({from: icoBackend});
+        await allocation.rewardFoundersAndPartners({ from: icoManager });
 
         let totalSupply = await token.totalSupply();
 

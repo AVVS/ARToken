@@ -8,7 +8,6 @@
     "lodash": "^4.17.4",
     "papaparse": "^4.3.6",
     "truffle": "^4.0.1",
-    "truffle-hdwallet-provider": "^0.0.3",
     "web3": "0.x.x"
   },
   "scripts": {
@@ -19,9 +18,10 @@
     "t:ropsten": "NODE_ENV=production truffle --network ropsten",
     "t:live": "NODE_ENV=production truffle --network live",
     "deploy": "yarn compile && yarn t:test deploy",
-    "deploy:ropsten": "NODE_ENV=production yarn compile && yarn t:ropsten deploy",
-    "deploy:live": "NODE_ENV=production yarn compile --all && yarn t:live deploy",
+    "deploy:ropsten": "rm -rf ./build; NODE_ENV=production yarn compile && yarn t:ropsten deploy",
+    "deploy:live": "rm -rf ./build; NODE_ENV=production yarn compile && yarn t:live deploy",
     "parity:ropsten": "parity ui --force-ui --chain ropsten --geth --jsonrpc-port 8547 --reseal-min-period 0 --tx-gas-limit 4704624 --tx-queue-mem-limit 100",
+    "parity:live": "parity ui --force-ui --geth --jsonrpc-port 8548 --reseal-min-period 0 --tx-gas-limit 4704624 --tx-queue-mem-limit 100",
     "e:ropsten": "yarn t:ropsten exec"
   },
   "resolutions": {
