@@ -19,3 +19,13 @@ const tokenValues = [
 const token = abi.rawEncode(tokenTypes, tokenValues);
 
 console.log(token.toString('hex'));
+
+const vestingTypes = ['address', 'address'];
+const vestingValues = [
+  '0x00E5300B54F2B5AFA9e11201b5Fc048cAE52d981',
+  '0x59f212Ca3F26A3263Fc3dF4108b035c12e3583fD'
+];
+
+const vestingABI = abi.rawEncode(vestingTypes, vestingValues);
+
+console.log(vestingABI.toString('hex'));

@@ -1,17 +1,12 @@
 const Migrations = artifacts.require("./Migrations.sol");
+const config = require('../truffle');
 
 module.exports = function(deployer, network, accounts) {
-  let owner;
-  switch (network) {
-    case 'live':
-      throw new Error('not configured');
-
-    case 'ropsten':
-      owner = '0x006eb704ab30fd9fee1db6561856d75d5db8fa4e';
-      break;
-
-    default:
-      owner = accounts[0];
+  // unlock for 1 hour
+  if (process.env.ACCOUNT_PASSWORD && config.networks[network].from) {
+    web3.personal.unlockAccount(config.networks[network].from, process.env.ACCOUNT_PASSWORD, `0x${Number(60 * 60).toString(16)}`);
+  } else {
+    console.warn('no account to unlock');
   }
 
   deployer.deploy(Migrations);

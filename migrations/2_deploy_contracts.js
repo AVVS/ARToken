@@ -1,18 +1,5 @@
 const TokenAllocation = artifacts.require('./TokenAllocation.sol');
-
-/*
-var icoManager = "0x0";     // Public key for the backend script that mints tokens
-var foundersWallet = "0x0"; // Public key of Kosta's wallet that will receive tokens after vesting
-var partnersWallet = "0x0"; // Public key of the wallet that allocates early contributors' bonus
-var totalWeiGathered = 0;   // Total sum of all the money gathered throughout the crowdsale
-*/
-
-// Test data corresponding to ../testrpc.sh, see the keys there
-// var icoManager = "0x7fb504439b8a99cf1e31dfd0490fd19a7bb502d0";     // Public key for the manager that launches phases and pauses
-// var icoBackend = "0x7fb504439b8a99cf1e31dfd0490fd19a7bb502d0";     // Public key for the backend script that mints tokens
-// var foundersWallet = "0xb8d3051d9a97247e592cbc49a1dc14cfa2c0aee0"; // Public key of Kosta's wallet that will receive tokens after vesting
-// var partnersWallet = "0xb8d3051d9a97247e592cbc49a1dc14cfa2c0aee0"; // Public key of the wallet that allocates early contributors' bonus
-// var emergencyManager = "0xb8d3051d9a97247e592cbc49a1dc14cfa2c0aee0"; // Public key of the wallet that can perform emergency functions
+const config = require('../truffle');
 
 const info = [
   'icoManager: %s',
@@ -26,7 +13,14 @@ module.exports = function(deployer, network, _accounts) {
   let accounts;
   switch (network) {
     case 'live':
-      throw new Error('not defined');
+      accounts = [
+        '0x00dC895137042E1b0959E85E60747Ed9B58f0701',
+        '0x005c1E464F8d4422e08B0620C7ADcdcBbe0FB240',
+        '0x008ebEE8422f9Fe222a9B2C4A14A595846a457a4',
+        '0x00BBb48739cfd64B622776a22A57d741E48164C4',
+        '0x004899c9bAE1129fE359e6FAa2C97Ab6095C7335',
+      ];
+      break;
 
     case 'ropsten':
       accounts = [
@@ -45,6 +39,13 @@ module.exports = function(deployer, network, _accounts) {
   // deployer
   console.error('\nAccounts:');
   console.error(info, ...accounts);
+
+  // unlock for 1 hour
+  if (process.env.ACCOUNT_PASSWORD && config.networks[network].from) {
+    web3.personal.unlockAccount(config.networks[network].from, process.env.ACCOUNT_PASSWORD, `0x${Number(60 * 60).toString(16)}`);
+  } else {
+    console.warn('no account to unlock');
+  }
 
   deployer.deploy(TokenAllocation, ...accounts);
 };

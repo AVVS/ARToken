@@ -1,6 +1,7 @@
 pragma solidity ^0.4.18;
 
 import "./StandardToken.sol";
+import "../ERC20.sol";
 
 contract Cappasity is StandardToken {
 
@@ -43,27 +44,27 @@ contract Cappasity is StandardToken {
 
     // ERC20 functions
     // =========================
-    function transfer(address _to, uint _value) public returns (bool success) {
+    function transfer(address _to, uint _value) public returns (bool) {
         require(!tokensAreFrozen);
         return super.transfer(_to, _value);
     }
 
-    function transferFrom(address _from, address _to, uint _value) public returns (bool success) {
+    function transferFrom(address _from, address _to, uint _value) public returns (bool) {
         require(!tokensAreFrozen);
         return super.transferFrom(_from, _to, _value);
     }
 
-    function approve(address _spender, uint _value) public returns (bool success) {
+    function approve(address _spender, uint _value) public returns (bool) {
         require(!tokensAreFrozen);
         return super.approve(_spender, _value);
     }
 
-    function increaseApproval(address _spender, uint _addedValue) public returns (bool success) {
+    function increaseApproval(address _spender, uint _addedValue) public returns (bool) {
         require(!tokensAreFrozen);
         return super.increaseApproval(_spender, _addedValue);
     }
 
-    function decreaseApproval(address _spender, uint _subtractedValue) public returns (bool success) {
+    function decreaseApproval(address _spender, uint _subtractedValue) public returns (bool) {
         require(!tokensAreFrozen);
         return super.decreaseApproval(_spender, _subtractedValue);
     }

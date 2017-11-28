@@ -1,10 +1,12 @@
 {
   "devDependencies": {
     "@digix/web3-console": "^0.0.2",
+    "bluebird": "^3.5.1",
     "ethereumjs-abi": "^0.6.4",
     "ganache-cli": "^6.0.3",
     "ganache-core": "^2.0.2",
     "lodash": "^4.17.4",
+    "papaparse": "^4.3.6",
     "truffle": "^4.0.1",
     "truffle-hdwallet-provider": "^0.0.3",
     "web3": "0.x.x"
@@ -19,7 +21,8 @@
     "deploy": "yarn compile && yarn t:test deploy",
     "deploy:ropsten": "NODE_ENV=production yarn compile && yarn t:ropsten deploy",
     "deploy:live": "NODE_ENV=production yarn compile --all && yarn t:live deploy",
-    "parity:ropsten": "parity ui --force-ui --chain ropsten --geth -lrpc=trace --jsonrpc-port 8547 --unlock 0x006EB704aB30Fd9FEe1db6561856D75D5db8fA4e --password .env --reseal-min-period 0 --tx-gas-limit 4704624"
+    "parity:ropsten": "parity ui --force-ui --chain ropsten --geth --jsonrpc-port 8547 --reseal-min-period 0 --tx-gas-limit 4704624 --tx-queue-mem-limit 100",
+    "e:ropsten": "yarn t:ropsten exec"
   },
   "resolutions": {
     "web3": "0.20.2"

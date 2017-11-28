@@ -8,4 +8,5 @@ build/
 coverage.json
 allFiredEvents
 scTopics
-.env
+.env*
+data/

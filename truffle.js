@@ -28,9 +28,12 @@ module.exports = {
       gasPrice: 1000000000, // 1 gwei
     },
     live: {
+      from: '0x007Be495E1a571eE29cf2e40378a3114f12Cb77D',
       network_id: 1,
       host: 'localhost',
       port: 8548,
+      gas: 4500000,
+      gasPrice: 1000000000,
     },
   },
   solc: {

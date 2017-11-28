@@ -9,7 +9,7 @@ contract StandardToken is ERC20 {
     mapping (address => uint) balances;
     mapping (address => mapping (address => uint)) allowed;
 
-    function transfer(address _to, uint _value) onlyPayloadSize(2 * 32) public returns (bool success) {
+    function transfer(address _to, uint _value) onlyPayloadSize(2 * 32) public returns (bool) {
         if (balances[msg.sender] >= _value
             && _value > 0
             && _to != msg.sender
@@ -25,7 +25,7 @@ contract StandardToken is ERC20 {
         return false;
     }
 
-    function transferFrom(address _from, address _to, uint _value) public returns (bool success) {
+    function transferFrom(address _from, address _to, uint _value) public returns (bool) {
         if (balances[_from] >= _value
             && allowed[_from][msg.sender] >= _value
             && _value > 0
@@ -41,15 +41,15 @@ contract StandardToken is ERC20 {
         return false;
     }
 
-    function balanceOf(address _owner) constant public returns (uint balance) {
+    function balanceOf(address _owner) constant public returns (uint) {
         return balances[_owner];
     }
 
-    function allowance(address _owner, address _spender) constant public returns (uint remaining) {
+    function allowance(address _owner, address _spender) constant public returns (uint) {
         return allowed[_owner][_spender];
     }
 
-    function approve(address _spender, uint _value) public returns (bool success) {
+    function approve(address _spender, uint _value) public returns (bool) {
         require(_spender != address(0));
         // needs to be called twice -> first set to 0, then increase to another amount
         // this is to avoid race conditions
@@ -60,7 +60,7 @@ contract StandardToken is ERC20 {
         return true;
     }
 
-    function increaseApproval(address _spender, uint _addedValue) public returns (bool success) {
+    function increaseApproval(address _spender, uint _addedValue) public returns (bool) {
         // useless operation
         require(_spender != address(0));
 
@@ -70,7 +70,7 @@ contract StandardToken is ERC20 {
         return true;
     }
 
-    function decreaseApproval(address _spender, uint _subtractedValue) public returns (bool success) {
+    function decreaseApproval(address _spender, uint _subtractedValue) public returns (bool) {
         // useless operation
         require(_spender != address(0));
 
