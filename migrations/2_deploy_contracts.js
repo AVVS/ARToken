@@ -9,6 +9,8 @@ const info = [
   'emergencyManager: %s\n',
 ].join('\n');
 
+TokenAllocation.synchronization_timeout = 60 * 60 * 1000; // 60 minutes
+
 module.exports = function(deployer, network, _accounts) {
   let accounts;
   switch (network) {

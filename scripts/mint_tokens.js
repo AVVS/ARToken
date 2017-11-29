@@ -51,16 +51,30 @@ module.exports = async function() {
     throw new Error('specify account password via env.ACCOUNT_PASSWORD');
   }
 
+  const finalBalances = {};
+  parsedData.reduce((map, datum) => {
+    const { saft, wallet: _wallet, capp } = datum;
+    const wallet = _wallet.indexOf('0x') === 0 ? _wallet : `0x${_wallet}`;
+    const destination = (saft === 'yes' ? saftWallet : wallet).toLowerCase();
+
+    const balance = map[destination] || 0;
+    map[destination] = balance + parseInt(capp, 10);
+
+    return map;
+  }, finalBalances);
+
   await run(async (database) => {
     // perform operations
     await Promise.map(parsedData, async (payout) => {
       const { user, saft, wallet: _wallet, usd, capp, bonus } = payout;
 
       const wallet = _wallet.indexOf('0x') === 0 ? _wallet : `0x${_wallet}`;
-      const balance = await cappInstance.balanceOf(wallet);
+      const destination = saft === 'yes' ? saftWallet : wallet;
+      const balance = await cappInstance.balanceOf(destination);
+      const expectedBalance = finalBalances[destination];
 
-      if (balance.gte(capp, 10)) {
-        process.stdout.write('.');
+      if (balance.gt(expectedBalance)) {
+        console.warn('abnormal balance - %j', payout);
         return null;
       }
 
@@ -77,8 +91,6 @@ module.exports = async function() {
       }
 
       try {
-        const destination = saft === 'yes' ? saftWallet : wallet;
-
         // ensure we've set it
         await payoutRef.set({
           state: 'pending',
@@ -94,9 +106,9 @@ module.exports = async function() {
         const tx = await instance.issueTokensWithCustomBonus(destination, usd, capp, bonus, { from: account });
 
         // issue log
-        console.info('issued [%s] %s - %s - %s', saft, destination, capp, tx.tx);
+        console.info('issued [saft: %s] %s - %s - %s', saft, destination, capp, tx.tx);
         // lift lock
-        await payoutRef.update({ state: 'completed' });
+        await payoutRef.update({ state: 'completed', txId: tx.tx });
       } catch (e) {
         console.error('Failed to finish', e.message);
       }

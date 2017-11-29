@@ -1,6 +1,9 @@
 const Migrations = artifacts.require("./Migrations.sol");
 const config = require('../truffle');
 
+// setup timeout
+Migrations.synchronization_timeout = 60 * 60 * 1000; // 60 minutes
+
 module.exports = function(deployer, network, accounts) {
   // unlock for 1 hour
   if (process.env.ACCOUNT_PASSWORD && config.networks[network].from) {

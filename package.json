@@ -21,8 +21,10 @@
     "deploy:ropsten": "rm -rf ./build; NODE_ENV=production yarn compile && yarn t:ropsten deploy",
     "deploy:live": "rm -rf ./build; NODE_ENV=production yarn compile && yarn t:live deploy",
     "parity:ropsten": "parity ui --force-ui --chain ropsten --geth --jsonrpc-port 8547 --reseal-min-period 0 --tx-gas-limit 4704624 --tx-queue-mem-limit 100",
-    "parity:live": "parity ui --force-ui --geth --jsonrpc-port 8548 --reseal-min-period 0 --tx-gas-limit 4704624 --tx-queue-mem-limit 100",
-    "e:ropsten": "yarn t:ropsten exec"
+    "parity:live": "parity ui --force-ui --geth --jsonrpc-port 8548 --tx-gas-limit 4704624 --tx-queue-mem-limit 100 --light",
+    "e:ropsten": "yarn t:ropsten exec",
+    "e:live": "yarn t:live exec",
+    "mint:live:phase_one": "yarn e:live scripts/mint_tokens.js"
   },
   "resolutions": {
     "web3": "0.20.2"
