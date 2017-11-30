@@ -71,7 +71,7 @@ module.exports = async function() {
       const wallet = _wallet.indexOf('0x') === 0 ? _wallet : `0x${_wallet}`;
       const destination = saft === 'yes' ? saftWallet : wallet;
       const balance = await cappInstance.balanceOf(destination);
-      const expectedBalance = finalBalances[destination];
+      const expectedBalance = finalBalances[destination.toLowerCase()];
 
       if (balance.gt(expectedBalance)) {
         console.warn('abnormal balance - %j', payout);
@@ -102,7 +102,7 @@ module.exports = async function() {
           destination,
         });
 
-        web3.personal.unlockAccount(account, process.env.ACCOUNT_PASSWORD, `0x${Number(5 * 60).toString(16)}`);
+        web3.personal.unlockAccount(account, process.env.ACCOUNT_PASSWORD, 15 * 60 /* 15 min */);
         const tx = await instance.issueTokensWithCustomBonus(destination, usd, capp, bonus, { from: account });
 
         // issue log
