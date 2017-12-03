@@ -48,6 +48,8 @@ module.exports = async function() {
   }, finalBalances);
 
   await run(async (database) => {
+    let tokens = 0;
+
     // perform operations
     await Promise.map(parsedData, async (payout) => {
       const { user, saft, wallet: _wallet, usd, capp, bonus } = payout;
@@ -62,11 +64,15 @@ module.exports = async function() {
         const txData = await payoutRef.once('value').then(s => s.val());
         const balanceAtOldDestination = await cappInstance.balanceOf(txData.destination);
         console.warn(
-          '[%s] - %s/%s/%s - %s - %s',
-          txData.state, balance.toNumber(), balanceAtOldDestination.toNumber(), capp,
+          '[%s] - %s - %s/%s/%s - %s - %s',
+          txData.state, user, balance.toNumber(), balanceAtOldDestination.toNumber(), capp,
           destination, txData.destination
         );
+
+        tokens += balanceAtOldDestination.minus(balance).toNumber();
       }
     }, { concurrency: 50 });
+
+    console.log('Tokens: %s', tokens / 1e2);
   });
 };
