@@ -1,18 +1,11 @@
 const Promise = require('bluebird');
 const findIndex = require('lodash/findIndex');
 const pick = require('lodash/pick');
-const argv = require('yargs').argv;
-const fs = require('fs');
 const path = require('path');
+
 const run = require(path.resolve(process.env.HOME, 'projects/firebase-tokensale/scripts/work'));
 
-const TokenAllocation = artifacts.require('./TokenAllocation.sol');
-const Cappasity = artifacts.require('./Cappasity.sol');
-
 module.exports = async function findtxIds() {
-  const instance = await TokenAllocation.deployed();
-  const cappInstance = Cappasity.at(await instance.tokenContract());
-  const wallet = argv.wallet;
   const web3 = this.web3;
 
   // started distributing at 4639984
@@ -54,12 +47,14 @@ module.exports = async function findtxIds() {
     const fields = ['usd', 'capp', 'bonus', 'destination'];
     const work = [];
 
+    // eslint-disable-next-line
     for (const [userId, payout] of Object.entries(payouts)) {
       const savedDataKey = payout.phase_one ? 'phase_one' : 'phase_one_locked';
       const payoutData = payout[savedDataKey];
 
       // if we have saved txId - just skip
-      if (payoutData.txId) continue;
+      // eslint-disable-next-line
+      if (payoutData.txId && payoutData.state === 'completed') continue;
 
       // stub or normalize destination
       if (payoutData.destination == null) {
@@ -70,17 +65,30 @@ module.exports = async function findtxIds() {
 
       const idx = findIndex(parsedTxs, pick(payoutData, fields));
 
-      // ensure we have different tx
-      if (foundIndexes[idx]) console.warn('matched multiple transactions:', parsedTxs[idx]);
-      foundIndexes[idx] = true;
+      if (idx === -1) {
+        console.warn('cant find tx', pick(payoutData, fields));
+        // eslint-disable-next-line
+        continue;
+      }
 
+      // ensure we have different tx
+      if (foundIndexes[idx]) {
+        console.warn('matched multiple transactions:', parsedTxs[idx]);
+        // eslint-disable-next-line
+        continue;
+      }
+
+      foundIndexes[idx] = true;
       const tx = parsedTxs[idx];
 
       // userId -> tx match
       console.log(userId, tx);
 
       // ensure we update database with transaction reference
-      work.push(database.ref(`/payouts/${userId}/${savedDataKey}/txId`).set(tx.txId));
+      work.push(
+        database.ref(`/payouts/${userId}/${savedDataKey}/txId`).set(tx.txId),
+        database.ref(`/payouts/${userId}/${savedDataKey}/state`).set('completed')
+      );
     }
 
     await Promise.all(work);

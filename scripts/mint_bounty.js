@@ -4,13 +4,12 @@ const fs = require('fs');
 const path = require('path');
 
 const run = require(path.resolve(process.env.HOME, 'projects/firebase-tokensale/scripts/work'));
-
 const TokenAllocation = artifacts.require('./TokenAllocation.sol');
 const Cappasity = artifacts.require('./Cappasity.sol');
 
 // setup timeout
-Cappasity.synchronization_timeout = 60 * 60 * 1000; // 60 minutes
-TokenAllocation.synchronization_timeout = 60 * 60 * 1000; // 60 minutes
+Cappasity.synchronization_timeout = 60 * 60 * 12 * 1000; // 60 minutes - 12 hrs
+TokenAllocation.synchronization_timeout = 60 * 60 * 12 * 1000; // 60 minutes - 12 hrs
 
 module.exports = async function mint() {
   const instance = await TokenAllocation.deployed();
@@ -20,17 +19,14 @@ module.exports = async function mint() {
   instance.synchronization_timeout = TokenAllocation.synchronization_timeout;
 
   let account;
-  let saftWallet;
 
   switch (artifacts.options.network) {
     case 'live':
       account = '0x005c1E464F8d4422e08B0620C7ADcdcBbe0FB240';
-      saftWallet = '0x009feA728C1eCda7eBa9877009b3c859BA5ec844';
       break;
 
     case 'ropsten':
       account = '0x00C87c16690bCD086d0F8F9216806C69f35ec12A';
-      saftWallet = '0x00C87c16690bCD086d0F8F9216806C69f35ec12A';
       break;
 
     default:
@@ -39,7 +35,7 @@ module.exports = async function mint() {
 
   console.info('Updating transations with %s', account);
 
-  const data = fs.createReadStream(`${process.cwd()}/data/payouts.csv`);
+  const data = fs.createReadStream(`${process.cwd()}/data/bounty.csv`);
   const csv = await Promise.fromCallback(next => (
     Papa.parse(data, { header: true, error: next, complete: next.bind(null, null) })
   ));
@@ -51,39 +47,21 @@ module.exports = async function mint() {
     throw new Error('specify account password via env.ACCOUNT_PASSWORD');
   }
 
-  const finalBalances = {};
-  parsedData.reduce((map, datum) => {
-    const { saft, wallet: _wallet, capp } = datum;
-    const wallet = _wallet.indexOf('0x') === 0 ? _wallet : `0x${_wallet}`;
-    const destination = (saft === 'yes' ? saftWallet : wallet).toLowerCase();
-
-    const balance = map[destination] || 0;
-    map[destination] = balance + parseInt(capp, 10);
-
-    return map;
-  }, finalBalances);
-
   await run(async (database) => {
     // perform operations
     await Promise.map(parsedData, async (payout) => {
-      const { user, saft, wallet: _wallet, usd, capp, bonus } = payout;
+      const { wallet: _wallet, capp: _capp } = payout;
 
-      const wallet = _wallet.indexOf('0x') === 0 ? _wallet : `0x${_wallet}`;
-      const destination = saft === 'yes' ? saftWallet : wallet;
-      const balance = await cappInstance.balanceOf(destination);
-      const expectedBalance = finalBalances[destination.toLowerCase()];
+      const wallet = _wallet.toLowerCase();
+      const destination = wallet;
+      const capp = Math.round(_capp * 1e2);
 
-      if (balance.gt(expectedBalance)) {
-        console.warn('abnormal balance - %j', payout);
-        return null;
-      }
-
-      const payoutRef = database.ref(`/payouts/${user}/phase_one`);
+      const payoutRef = database.ref(`/payouts/${wallet.toLowerCase()}/phase_one`);
       const txData = await payoutRef.once('value').then(s => s.val());
 
       if (txData != null) {
         if (txData.state === 'pending') {
-          console.warn('User %s - %s pending', user, capp);
+          console.warn('User %s - %s pending', wallet.toLowerCase(), capp);
         } else {
           process.stdout.write('.');
         }
@@ -94,19 +72,18 @@ module.exports = async function mint() {
         // ensure we've set it
         await payoutRef.set({
           state: 'pending',
-          wallet,
+          usd: '0',
           capp,
-          usd,
-          bonus,
-          saft,
+          bonus: capp,
           destination,
+          type: 'bounty',
         });
 
         web3.personal.unlockAccount(account, process.env.ACCOUNT_PASSWORD, 15 * 60 /* 15 min */);
-        const tx = await instance.issueTokensWithCustomBonus(destination, usd, capp, bonus, { from: account });
+        const tx = await instance.issueTokensWithCustomBonus(destination, '0', capp, capp, { from: account });
 
         // issue log
-        console.info('issued [saft: %s] %s - %s - %s', saft, destination, capp, tx.tx);
+        console.info('bounty issued %s - %s - %s', destination, capp, tx.tx);
         // lift lock
         await payoutRef.update({ state: 'completed', txId: tx.tx });
       } catch (e) {

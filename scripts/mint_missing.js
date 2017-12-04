@@ -4,13 +4,12 @@ const fs = require('fs');
 const path = require('path');
 
 const run = require(path.resolve(process.env.HOME, 'projects/firebase-tokensale/scripts/work'));
-
 const TokenAllocation = artifacts.require('./TokenAllocation.sol');
 const Cappasity = artifacts.require('./Cappasity.sol');
 
 // setup timeout
-Cappasity.synchronization_timeout = 60 * 60 * 1000; // 60 minutes
-TokenAllocation.synchronization_timeout = 60 * 60 * 1000; // 60 minutes
+Cappasity.synchronization_timeout = 60 * 60 * 12 * 1000; // 60 minutes - 12 hrs
+TokenAllocation.synchronization_timeout = 60 * 60 * 12 * 1000; // 60 minutes - 12 hrs
 
 module.exports = async function mint() {
   const instance = await TokenAllocation.deployed();
@@ -21,16 +20,19 @@ module.exports = async function mint() {
 
   let account;
   let saftWallet;
+  let temporaryWallet;
 
   switch (artifacts.options.network) {
     case 'live':
       account = '0x005c1E464F8d4422e08B0620C7ADcdcBbe0FB240';
       saftWallet = '0x009feA728C1eCda7eBa9877009b3c859BA5ec844';
+      temporaryWallet = '0x00f704196923d7739d922c83b48ca21916d024c5';
       break;
 
     case 'ropsten':
       account = '0x00C87c16690bCD086d0F8F9216806C69f35ec12A';
       saftWallet = '0x00C87c16690bCD086d0F8F9216806C69f35ec12A';
+      temporaryWallet = '0x00C87c16690bCD086d0F8F9216806C69f35ec12A';
       break;
 
     default:
@@ -39,7 +41,7 @@ module.exports = async function mint() {
 
   console.info('Updating transations with %s', account);
 
-  const data = fs.createReadStream(`${process.cwd()}/data/payouts.csv`);
+  const data = fs.createReadStream(`${process.cwd()}/data/missing-eth.csv`);
   const csv = await Promise.fromCallback(next => (
     Papa.parse(data, { header: true, error: next, complete: next.bind(null, null) })
   ));
@@ -51,33 +53,12 @@ module.exports = async function mint() {
     throw new Error('specify account password via env.ACCOUNT_PASSWORD');
   }
 
-  const finalBalances = {};
-  parsedData.reduce((map, datum) => {
-    const { saft, wallet: _wallet, capp } = datum;
-    const wallet = _wallet.indexOf('0x') === 0 ? _wallet : `0x${_wallet}`;
-    const destination = (saft === 'yes' ? saftWallet : wallet).toLowerCase();
-
-    const balance = map[destination] || 0;
-    map[destination] = balance + parseInt(capp, 10);
-
-    return map;
-  }, finalBalances);
-
   await run(async (database) => {
     // perform operations
     await Promise.map(parsedData, async (payout) => {
-      const { user, saft, wallet: _wallet, usd, capp, bonus } = payout;
+      const { user, saft, usd, capp, bonus } = payout;
 
-      const wallet = _wallet.indexOf('0x') === 0 ? _wallet : `0x${_wallet}`;
-      const destination = saft === 'yes' ? saftWallet : wallet;
-      const balance = await cappInstance.balanceOf(destination);
-      const expectedBalance = finalBalances[destination.toLowerCase()];
-
-      if (balance.gt(expectedBalance)) {
-        console.warn('abnormal balance - %j', payout);
-        return null;
-      }
-
+      const destination = saft === 'yes' ? saftWallet : temporaryWallet;
       const payoutRef = database.ref(`/payouts/${user}/phase_one`);
       const txData = await payoutRef.once('value').then(s => s.val());
 
@@ -94,12 +75,13 @@ module.exports = async function mint() {
         // ensure we've set it
         await payoutRef.set({
           state: 'pending',
-          wallet,
           capp,
           usd,
           bonus,
           saft,
           destination,
+          type: 'missing',
+          wallet: payout.wallet,
         });
 
         web3.personal.unlockAccount(account, process.env.ACCOUNT_PASSWORD, 15 * 60 /* 15 min */);

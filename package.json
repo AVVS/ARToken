@@ -1,12 +1,18 @@
 {
   "devDependencies": {
     "@digix/web3-console": "^0.0.2",
+    "babel-eslint": "^8.0.3",
     "bluebird": "^3.5.1",
+    "eslint": "4.12.1",
+    "eslint-config-makeomatic": "1.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-promise": "^3.6.0",
     "ethereumjs-abi": "^0.6.4",
     "ganache-cli": "^6.0.3",
     "ganache-core": "^2.0.2",
     "lodash": "^4.17.4",
     "papaparse": "^4.3.6",
+    "prettier": "1.8.2",
     "truffle": "^4.0.1",
     "web3": "0.x.x"
   },

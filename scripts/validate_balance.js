@@ -2,16 +2,16 @@ const Promise = require('bluebird');
 const Papa = require('papaparse');
 const fs = require('fs');
 const path = require('path');
+
 const run = require(path.resolve(process.env.HOME, 'projects/firebase-tokensale/scripts/work'));
 
 const TokenAllocation = artifacts.require('./TokenAllocation.sol');
 const Cappasity = artifacts.require('./Cappasity.sol');
 
-module.exports = async function() {
+module.exports = async function verify() {
   const instance = await TokenAllocation.deployed();
   const cappInstance = Cappasity.at(await instance.tokenContract());
 
-  let account;
   let saftWallet;
 
   switch (artifacts.options.network) {
@@ -24,7 +24,7 @@ module.exports = async function() {
       break;
 
     default:
-      saftWallet = _accounts[9];
+      throw new Error('unsupported');
   }
 
   const data = fs.createReadStream(`${process.cwd()}/data/payouts.csv`);
@@ -52,7 +52,7 @@ module.exports = async function() {
 
     // perform operations
     await Promise.map(parsedData, async (payout) => {
-      const { user, saft, wallet: _wallet, usd, capp, bonus } = payout;
+      const { user, saft, wallet: _wallet, capp } = payout;
 
       const wallet = _wallet.indexOf('0x') === 0 ? _wallet : `0x${_wallet}`;
       const destination = saft === 'yes' ? saftWallet : wallet;

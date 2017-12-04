@@ -1,0 +1,11 @@
+{
+  "extends": "makeomatic",
+  "globals": {
+    "artifacts": false,
+    "web3": false
+  },
+  "rules": {
+    "import/no-dynamic-require": 0,
+    "no-console": 0
+  }
+}

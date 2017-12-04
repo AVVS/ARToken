@@ -33,7 +33,7 @@ module.exports = {
       host: 'localhost',
       port: 8548,
       gas: 4500000,
-      gasPrice: 1000010002,
+      gasPrice: 1000010002 * 20,
     },
   },
   solc: {
